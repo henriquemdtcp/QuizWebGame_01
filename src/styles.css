@@ -1,0 +1,159 @@
+/* Reset básico */
+body {
+  margin: 0;
+  font-family: sans-serif;
+  line-height: 1.5; /* Melhor espaçamento de linha */
+}
+/* Estilos globais */
+.container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.title {
+  font-size: 1.5rem; /* Aumentado de 1.25rem */
+  font-weight: bold;
+  margin-bottom: 1.5rem; /* Aumentado de 1rem */
+}
+.button {
+  width: 100%;
+  text-align: left;
+  padding: 1rem; /* Aumentado de 0.75rem */
+  color: white;
+  border-radius: 0.375rem;
+  margin-bottom: 0.75rem; /* Aumentado de 0.5rem */
+  border: none;
+  cursor: pointer;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.4; /* Melhor espaçamento de linha */
+}
+.button-small {
+  font-size: 1rem; /* Aumentado de 0.875rem */
+}
+.button-medium {
+  font-size: 1.25rem; /* Aumentado de 1rem */
+}
+.button-large {
+  font-size: 1.5rem; /* Aumentado de 1.25rem */
+}
+/* Estilo base do botão */
+.button {
+  background-color: #3b82f6; /* Azul padrão */
+}
+.button:hover {
+  background-color: #2563eb; /* Azul mais escuro no hover */
+}
+/* Estados de seleção */
+.button-selected-correct {
+  background-color: #10b981; /* Verde para resposta correta */
+}
+.button-selected-correct:hover {
+  background-color: #059669;
+}
+.button-selected-incorrect {
+  background-color: #ef4444; /* Vermelho para resposta incorreta */
+}
+.button-selected-incorrect:hover {
+  background-color: #dc2626;
+}
+/* Estilos para a explicação */
+.explanation {
+  padding: 1.25rem; /* Aumentado de 1rem */
+  background-color: #f3f4f6;
+  border-radius: 0.375rem;
+  margin-top: 1.5rem; /* Aumentado de 1rem */
+  font-size: 1.125rem; /* Adicionado tamanho de fonte para explicação */
+  line-height: 1.6; /* Melhor espaçamento de linha para texto de leitura */
+}
+/* Media Queries para melhor utilização de espaço em desktop */
+@media (min-width: 768px) {
+  .container {
+    max-width: 85%; /* Aumentado de 80% */
+    padding: 2rem; /* Aumentado de 1.5rem */
+  }
+  
+  .quiz-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem; /* Aumentado de 1.5rem */
+    margin-top: 2rem; /* Aumentado de 1.5rem */
+  }
+  
+  .question-area {
+    padding-right: 1.5rem; /* Aumentado de 1rem */
+  }
+  
+  .question-area h2 {
+    line-height: 1.5; /* Espaçamento entre linhas para questões */
+    margin-bottom: 1.5rem;
+  }
+  
+  .options-area {
+    padding-left: 1.5rem; /* Aumentado de 1rem */
+    border-left: 1px solid #e5e7eb;
+  }
+  
+  /* Espaçamento adicional entre opções para desktop */
+  .options-area .button {
+    margin-bottom: 1rem; /* Aumentado de 0.75rem para desktop */
+  }
+}
+/* Para telas realmente grandes */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 75%; /* Aumentado de 70% */
+  }
+  
+  .title {
+    font-size: 1.75rem; /* Título maior para telas grandes */
+  }
+  
+  .button-small {
+    font-size: 1.125rem; /* Maior para telas grandes */
+  }
+  
+  .button-medium {
+    font-size: 1.375rem; /* Maior para telas grandes */
+  }
+  
+  .button-large {
+    font-size: 1.625rem; /* Maior para telas grandes */
+  }
+  
+  /* Espaçamento adicional entre elementos */
+  .quiz-layout {
+    gap: 2.5rem;
+  }
+}
+/* Media Queries para dispositivos móveis */
+@media (max-width: 768px) {
+  .container {
+    max-width: 100%;
+    padding: 0.75rem; /* Aumentado ligeiramente de 0.5rem */
+  }
+  
+  .title {
+    font-size: 1.125rem; /* Aumentado de 1rem */
+  }
+  
+  .button {
+    padding: 0.75rem; /* Aumentado de 0.5rem */
+  }
+  
+  .button-small {
+    font-size: 0.875rem; /* Aumentado de 0.75rem */
+  }
+  
+  .button-medium {
+    font-size: 1rem; /* Aumentado de 0.875rem */
+  }
+  
+  .button-large {
+    font-size: 1.125rem; /* Aumentado de 1rem */
+  }
+}
