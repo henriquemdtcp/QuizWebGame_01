@@ -43,10 +43,10 @@ body {
 }
 /* Estilo base do botão */
 .button {
-  background-color: #f97316; /* Laranja padrão */
+  background-color: #475569; /* Azul acinzentado */
 }
 .button:hover {
-  background-color: #ea580c; /* Laranja mais escuro no hover */
+  background-color: #334155;
 }
 /* Estados de seleção */
 .button-selected-correct {
