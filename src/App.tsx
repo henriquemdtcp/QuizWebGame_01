@@ -12,7 +12,7 @@ interface Question {
 
 // Updated discipline URLs with 12 disciplines
 const DISCIPLINE_URLS = {
-  "Língua Portuguesa": "https://api.npoint.io/5bbe7688a1309b743f0a",
+  "LodJerj_RegInt_NormasCGJ": "https://api.npoint.io/3bbe2d34838a59690d3a",
   "Direito Constitucional": "https://api.npoint.io/faf4c48ea248df88fc61",
   "Direito Administrativo": "https://api.npoint.io/57648079afd880c4125a",
   "Direito Adm. Compilado TJs": "https://api.npoint.io/d21d3b62969820d8a28b",
