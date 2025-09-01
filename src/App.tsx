@@ -13,7 +13,7 @@ interface Question {
 // Updated discipline URLs with 12 disciplines
 const DISCIPLINE_URLS = {
   "LodJerj_RegInt_NormasCGJ": "https://api.npoint.io/3bbe2d34838a59690d3a",
-  "Direito Constitucional": "https://api.npoint.io/faf4c48ea248df88fc61",
+  "DirProcPen_FGV_2022a2025_ago": "https://api.npoint.io/2c152b014f18efa4b839",
   "Direito Administrativo": "https://api.npoint.io/57648079afd880c4125a",
   "Direito Adm. Compilado TJs": "https://api.npoint.io/d21d3b62969820d8a28b",
   "D.Trib - Conceito de Tributo e Espécies Tributárias": "https://api.npoint.io/db901394f7ab66c3aef0",
