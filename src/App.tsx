@@ -16,7 +16,7 @@ const DISCIPLINE_URLS = {
   "DirProcPen_FGV_2022a2025_ago": "https://api.npoint.io/2c152b014f18efa4b839",
   "DirProcPen_AçaoPenal-Renuncia": "https://api.npoint.io/b6a4a71f953732984397",
   "Direito Adm. Compilado TJs": "https://api.npoint.io/d21d3b62969820d8a28b",
-  "D.Trib - Conceito de Tributo e Espécies Tributárias": "https://api.npoint.io/db901394f7ab66c3aef0",
+  "FGV_2021aSet2025_EqvLog_e_NegProposicoes": "https://api.npoint.io/4e49d3ff24cbef2e59f8",
   "D.Trib - Princípios, Imunidades e Competência": "https://api.npoint.io/d3175adc8654e4375bdf",
   "DirAdmin - MP-RJ": "https://api.npoint.io/d6a488197d0a874a2727",
   "DirAdmin - Est": "https://api.npoint.io/1801adf4d9f26c158c64",
