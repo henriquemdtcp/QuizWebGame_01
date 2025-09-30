@@ -17,7 +17,7 @@ const DISCIPLINE_URLS = {
   "DirProcPen_AçaoPenal-Renuncia": "https://api.npoint.io/b6a4a71f953732984397",
   "Direito Adm. Compilado TJs": "https://api.npoint.io/d21d3b62969820d8a28b",
   "FGV_2021aSet2025_EqvLog_e_NegProposicoes": "https://api.npoint.io/4e49d3ff24cbef2e59f8",
-  "D.Trib - Princípios, Imunidades e Competência": "https://api.npoint.io/d3175adc8654e4375bdf",
+  "FGV_DPP_Procedimentos": "https://api.npoint.io/fe09fb0d17bd375dab30",
   "DirAdmin - MP-RJ": "https://api.npoint.io/d6a488197d0a874a2727",
   "DirAdmin - Est": "https://api.npoint.io/1801adf4d9f26c158c64",
   "Português FGV 2025": "https://api.npoint.io/2f4aafb421c2f68dffa4",
