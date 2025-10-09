@@ -20,7 +20,7 @@ const DISCIPLINE_URLS = {
   "FGV_DPP_Procedimentos": "https://api.npoint.io/fe09fb0d17bd375dab30",
   "Est_Sentença e Recursos": "https://api.npoint.io/e46eb88f71c646e2d0c9",
   "Est_DirCiv-Contratos-S1": "https://api.npoint.io/a4287ab01660bf62ccba",
-  "Português FGV 2025": "https://api.npoint.io/2f4aafb421c2f68dffa4",
+  "Licitações_35Quest_prof.Herbert": "https://api.npoint.io/f48b250883c1eea631db",
   "Botão 10": "https://api.npoint.io/d4409edb551a34f98119",
   "TI": "https://api.npoint.io/placeholder7"
 };
