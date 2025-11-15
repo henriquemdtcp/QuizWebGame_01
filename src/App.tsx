@@ -88,7 +88,7 @@ const MainScreen = ({ mainIndex, onSelectSubject, isMobile }: {
   isMobile: boolean;
 }) => (
   <div className="container">
-    <h1 className="title">Escolha a Matéria:</h1>
+    <h1 className="title">Escolha a Opção:</h1>
     <p className="mb-4 text-gray-500">Você está usando um {isMobile ? "telefone celular" : "computador/notebook"}</p>
     <div className="space-y-3">
       {Object.keys(mainIndex).map((subject) => (
