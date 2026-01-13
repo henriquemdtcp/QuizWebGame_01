@@ -169,6 +169,7 @@ const AppQT: React.FC = () => {
   // Estados de Navegação
   const [currentView, setCurrentView] = useState<ViewState>('loadingIndex');
   const [mainIndex, setMainIndex] = useState<MainIndex | null>(null);
+  const [indexLoadTime, setIndexLoadTime] = useState<string | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [selectedSubTopic, setSelectedSubTopic] = useState<string | null>(null);
   const [selectedQuizUrl, setSelectedQuizUrl] = useState<string | null>(null);
