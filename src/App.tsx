@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import useIsMobile from "./hooks/useIsMobile";
 import "./styles.css";
 
-// Interface da Questão (sem mudanças)
+// Interface da Questão
 interface Question {
   id: number | string;
   question: string;
@@ -11,8 +11,11 @@ interface Question {
   explanation: string;
 }
 
+// Estrutura recursiva do índice: cada chave leva a uma URL (string) ou a outro subnível
+type IndexNode = string | { [key: string]: IndexNode };
+type MainIndex = Record<string, IndexNode>;
+
 // --- URL DO ÍNDICE PRINCIPAL ---
-// O JSON neste link contém a estrutura.
 const MAIN_INDEX_URL = "https://api.npoint.io/4c6da8279c965af748ca";
 
 // Componente separado para uma opção de resposta
@@ -52,7 +55,6 @@ const AnswerOption = React.memo(({
   );
 });
 
-// Função atualizada para definir tamanhos de fonte mais adequados
 const getFontSizeClass = (textLength: number, isMobile: boolean): string => {
   if (isMobile) {
     if (textLength <= 100) return "button-large";
@@ -65,7 +67,6 @@ const getFontSizeClass = (textLength: number, isMobile: boolean): string => {
   }
 };
 
-// Nova função para determinar o tamanho da fonte para opções de resposta
 const getOptionFontSize = (option: string, isMobile: boolean): string => {
   const optionLength = option.length;
   if (isMobile) {
@@ -79,72 +80,97 @@ const getOptionFontSize = (option: string, isMobile: boolean): string => {
   }
 };
 
-// --- NOVOS COMPONENTES DE TELA ---
+// --- TELAS DE NAVEGAÇÃO ---
 
-// (NOVO) Tela Principal - Nível 1: Matérias
-const MainScreen = ({ mainIndex, onSelectSubject, isMobile }: {
-  mainIndex: Record<string, Record<string, string>>;
-  onSelectSubject: (subject: string) => void;
+const MainScreen = ({
+  mainIndex,
+  onSelectNode,
+  isMobile
+}: {
+  mainIndex: MainIndex;
+  onSelectNode: (key: string, value: IndexNode) => void;
   isMobile: boolean;
 }) => (
   <div className="container">
     <h1 className="title">Escolha a Opção:</h1>
-    <p className="mb-4 text-gray-500">Você está usando um {isMobile ? "telefone celular" : "computador/notebook"}</p>
+    <p className="mb-4 text-gray-500">
+      Você está usando um {isMobile ? "telefone celular" : "computador/notebook"}
+    </p>
     <div className="space-y-3">
-      {Object.keys(mainIndex).map((subject) => (
+      {Object.entries(mainIndex).map(([key, value]) => (
         <button
-          key={subject}
-          onClick={() => onSelectSubject(subject)}
+          key={key}
+          onClick={() => onSelectNode(key, value)}
           className="button button-large w-full text-left"
         >
-          {subject}
+          {key}
         </button>
       ))}
     </div>
   </div>
 );
 
-// (ANTIGA StartScreen, agora) Tela de Assuntos - Nível 2: Assuntos
-const SubjectScreen = ({ subjectData, subjectName, onSelectSubTopic, onBack, isMobile }: {
-  subjectData: Record<string, string>;
-  subjectName: string;
-  onSelectSubTopic: (subTopic: string, url: string) => void;
+const SubjectScreen = ({
+  nodeData,
+  path,
+  onSelectNode,
+  onBack,
+  isMobile
+}: {
+  nodeData: Record<string, IndexNode>;
+  path: string[];
+  onSelectNode: (key: string, value: IndexNode) => void;
   onBack: () => void;
-  isMobile: boolean; // Mantido para consistência
-}) => (
-  <div className="container">
-    <button onClick={onBack} className="button button-small mb-4">
-      &larr; Voltar para Matérias
-    </button>
-    <h1 className="title">Escolha o Assunto:</h1>
-    <h2 className="text-xl text-gray-600 mb-4">{subjectName}</h2>
-    <div className="space-y-3">
-      {/* Usamos Object.entries para pegar o nome do assunto E a URL */}
-      {Object.entries(subjectData).map(([subTopic, url]) => (
-        <button
-          key={subTopic}
-          onClick={() => onSelectSubTopic(subTopic, url)}
-          className="button button-large w-full text-left"
-        >
-          {subTopic}
-        </button>
-      ))}
-    </div>
-  </div>
-);
+  isMobile: boolean;
+}) => {
+  const backLabel =
+    path.length <= 1
+      ? "\u2190 Voltar para Matérias"
+      : `\u2190 Voltar para ${path[path.length - 2]}`;
 
-// Componente de carregamento (sem mudanças)
+  return (
+    <div className="container">
+      <button onClick={onBack} className="button button-small mb-4">
+        {backLabel}
+      </button>
+      <h1 className="title">Escolha o Assunto:</h1>
+      <h2 className="text-xl text-gray-600 mb-4">{path.join(" \u203A ")}</h2>
+      <div className="space-y-3">
+        {Object.entries(nodeData).map(([key, value]) => {
+          const isEmptyUrl = typeof value === "string" && !value.trim();
+          return (
+            <button
+              key={key}
+              onClick={() => onSelectNode(key, value)}
+              className={`button button-large w-full text-left ${
+                isEmptyUrl ? "opacity-60" : ""
+              }`}
+            >
+              {key}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 const LoadingScreen = ({ error }: { error?: string }) => (
   <div className="container">
-    <h1 className="title">
-      {error ? "Erro ao carregar" : "Carregando..."}
-    </h1>
+    <h1 className="title">{error ? "Erro ao carregar" : "Carregando..."}</h1>
     {error && <p className="text-red-500">{error}</p>}
   </div>
 );
 
-// Componente de resultado final (sem mudanças)
-const ScoreScreen = ({ score, total, onRestart }: { score: number, total: number, onRestart: () => void }) => (
+const ScoreScreen = ({
+  score,
+  total,
+  onRestart
+}: {
+  score: number;
+  total: number;
+  onRestart: () => void;
+}) => (
   <div className="container">
     <h1 className="title">Quiz Completo!</h1>
     <p className="mb-4">
@@ -156,24 +182,27 @@ const ScoreScreen = ({ score, total, onRestart }: { score: number, total: number
   </div>
 );
 
-// --- COMPONENTE PRINCIPAL ATUALIZADO ---
+// --- COMPONENTE PRINCIPAL ---
 
-type ViewState = 'loadingIndex' | 'main' | 'subject' | 'loadingQuiz' | 'quiz' | 'score' | 'error';
-
-// Definindo o tipo para o nosso índice principal
-type MainIndex = Record<string, Record<string, string>>;
+type ViewState =
+  | "loadingIndex"
+  | "main"
+  | "subject"
+  | "loadingQuiz"
+  | "quiz"
+  | "score"
+  | "error";
 
 const AppQT: React.FC = () => {
   const isMobile = useIsMobile(768);
 
   // Estados de Navegação
-  const [currentView, setCurrentView] = useState<ViewState>('loadingIndex');
+  const [currentView, setCurrentView] = useState<ViewState>("loadingIndex");
   const [mainIndex, setMainIndex] = useState<MainIndex | null>(null);
-  const [indexLoadTime, setIndexLoadTime] = useState<string | null>(null);
-  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const [path, setPath] = useState<string[]>([]);
   const [selectedSubTopic, setSelectedSubTopic] = useState<string | null>(null);
   const [selectedQuizUrl, setSelectedQuizUrl] = useState<string | null>(null);
-  
+
   // Estados do Quiz
   const [questions, setQuestions] = useState<Question[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -182,97 +211,130 @@ const AppQT: React.FC = () => {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [score, setScore] = useState(0);
 
-  // Efeito 1: Carregar o índice principal de matérias
+  // Resolve o nó atual da árvore conforme o caminho navegado
+  const currentNode = useMemo<IndexNode | null>(() => {
+    if (!mainIndex) return null;
+    let node: IndexNode = mainIndex;
+    for (const key of path) {
+      if (typeof node === "object" && node !== null && key in node) {
+        node = node[key];
+      } else {
+        return null;
+      }
+    }
+    return node;
+  }, [mainIndex, path]);
+
+  // Efeito 1: Carregar o índice principal
   useEffect(() => {
     const fetchMainIndex = async () => {
       try {
         const response = await fetch(MAIN_INDEX_URL);
-        if (!response.ok) throw new Error(`Falha ao carregar o índice de matérias (${response.status})`);
+        if (!response.ok) {
+          throw new Error(`Falha ao carregar o índice de matérias (${response.status})`);
+        }
         const data = await response.json();
-        
-        if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+
+        if (typeof data !== "object" || data === null || Array.isArray(data)) {
           throw new Error("Formato do índice de matérias inválido");
         }
-        
+
         setMainIndex(data);
-        setCurrentView('main');
+        setCurrentView("main");
       } catch (e) {
         setError(e instanceof Error ? e.message : "Erro desconhecido");
-        setCurrentView('error');
+        setCurrentView("error");
       }
     };
 
     fetchMainIndex();
-  }, []); // Roda apenas uma vez
+  }, []);
 
-  // Efeito 2: Carregar as questões do quiz quando uma URL for selecionada
+  // Efeito 2: Carregar as questões quando uma URL final for selecionada
   useEffect(() => {
-    if (selectedQuizUrl) {
-      const fetchQuestions = async () => {
-        try {
-          // Reset de erro e questões antigas
-          setError(null);
-          setQuestions([]); 
-          
-          const response = await fetch(selectedQuizUrl);
-          if (!response.ok) throw new Error(`Erro ao carregar as questões (${response.status})`);
+    if (!selectedQuizUrl) return;
 
-          const data = await response.json();
+    const fetchQuestions = async () => {
+      try {
+        setError(null);
+        setQuestions([]);
 
-          if (!Array.isArray(data)) {
-            throw new Error("O formato dos dados não é um array");
-          }
-          
-          const validatedQuestions = data.map((q, index) => {
-            if (!q || 
-                (typeof q.id !== 'number' && typeof q.id !== 'string') || 
-                typeof q.question !== 'string' || 
-                !Array.isArray(q.options) || 
-                typeof q.correct !== 'number' || 
-                typeof q.explanation !== 'string') {
-              throw new Error(`Questão #${index + 1} tem formato inválido`);
-            }
-            return q as Question;
-          });
-
-          if (validatedQuestions.length > 0) {
-            setQuestions(validatedQuestions);
-            setCurrentView('quiz'); // Mostra o quiz
-          } else {
-            throw new Error("Nenhuma questão encontrada neste tópico.");
-          }
-          
-        } catch (error) {
-          console.error("Erro:", error);
-          setError(error instanceof Error ? error.message : "Erro desconhecido");
-          setCurrentView('error'); // Mostra tela de erro
+        const response = await fetch(selectedQuizUrl);
+        if (!response.ok) {
+          throw new Error(`Erro ao carregar as questões (${response.status})`);
         }
-      };
 
-      fetchQuestions();
-    }
-  }, [selectedQuizUrl]); // Roda sempre que a URL do quiz mudar
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+          throw new Error(`A URL configurada não retornou JSON válido (${selectedQuizUrl}).`);
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error("O formato dos dados não é um array");
+        }
+
+        const validatedQuestions = data.map((q, index) => {
+          if (
+            !q ||
+            (typeof q.id !== "number" && typeof q.id !== "string") ||
+            typeof q.question !== "string" ||
+            !Array.isArray(q.options) ||
+            typeof q.correct !== "number" ||
+            typeof q.explanation !== "string"
+          ) {
+            throw new Error(`Questão #${index + 1} tem formato inválido`);
+          }
+          return q as Question;
+        });
+
+        if (validatedQuestions.length > 0) {
+          setQuestions(validatedQuestions);
+          setCurrentView("quiz");
+        } else {
+          throw new Error("Nenhuma questão encontrada neste tópico.");
+        }
+      } catch (err) {
+        console.error("Erro:", err);
+        setError(err instanceof Error ? err.message : "Erro desconhecido");
+        setCurrentView("error");
+      }
+    };
+
+    fetchQuestions();
+  }, [selectedQuizUrl]);
 
   // --- Handlers de Navegação ---
 
-  const handleSubjectSelect = useCallback((subject: string) => {
-    setSelectedSubject(subject);
-    setCurrentView('subject');
+  const handleNodeSelect = useCallback((key: string, value: IndexNode) => {
+    if (typeof value === "string") {
+      if (!value.trim()) {
+        setError(`O bloco "${key}" ainda não possui URL configurada.`);
+        setCurrentView("error");
+        return;
+      }
+      setSelectedSubTopic(key);
+      setSelectedQuizUrl(value);
+      setCurrentView("loadingQuiz");
+    } else if (typeof value === "object" && value !== null) {
+      setPath((prev) => [...prev, key]);
+      setCurrentView("subject");
+    }
   }, []);
 
-  const handleSubTopicSelect = useCallback((subTopic: string, url: string) => {
-    setSelectedSubTopic(subTopic);
-    setSelectedQuizUrl(url);
-    setCurrentView('loadingQuiz'); // Mostra "Carregando..." enquanto busca as questões
-  }, []);
+  const handleBackStep = useCallback(() => {
+    setError(null);
+    if (path.length <= 1) {
+      setPath([]);
+      setCurrentView("main");
+    } else {
+      setPath((prev) => prev.slice(0, -1));
+      setCurrentView("subject");
+    }
+  }, [path.length]);
 
-  const handleBackToMain = useCallback(() => {
-    setCurrentView('main');
-    setSelectedSubject(null);
-  }, []);
-
-  const handleBackToSubject = useCallback(() => {
-    // Limpa estado do quiz atual
+  const handleBackFromQuiz = useCallback(() => {
     setQuestions([]);
     setSelectedSubTopic(null);
     setSelectedQuizUrl(null);
@@ -281,10 +343,22 @@ const AppQT: React.FC = () => {
     setSelectedAnswer(null);
     setScore(0);
     setError(null);
-    
-    // Volta para a tela de assuntos
-    setCurrentView('subject');
-  }, []);
+
+    setCurrentView(path.length > 0 ? "subject" : "main");
+  }, [path.length]);
+
+  const handleBackFromError = useCallback(() => {
+    setQuestions([]);
+    setSelectedSubTopic(null);
+    setSelectedQuizUrl(null);
+    setError(null);
+
+    if (path.length > 0) {
+      setCurrentView("subject");
+    } else {
+      setCurrentView("main");
+    }
+  }, [path.length]);
 
   // --- Handlers do Quiz ---
 
@@ -303,21 +377,20 @@ const AppQT: React.FC = () => {
 
   const handleNextQuestion = useCallback(() => {
     if (!questions.length) return;
-    
+
     if (currentQuestion + 1 < questions.length) {
       setCurrentQuestion((prev) => prev + 1);
       setSelectedAnswer(null);
       setShowExplanation(false);
     } else {
-      setCurrentView('score'); // Mudou de setShowScore(true)
+      setCurrentView("score");
     }
   }, [currentQuestion, questions]);
 
   const restartQuiz = useCallback(() => {
-    // Reseta tudo e volta para a tela principal
-    setCurrentView('main');
+    setCurrentView("main");
     setQuestions([]);
-    setSelectedSubject(null);
+    setPath([]);
     setSelectedSubTopic(null);
     setSelectedQuizUrl(null);
     setCurrentQuestion(0);
@@ -327,19 +400,22 @@ const AppQT: React.FC = () => {
     setError(null);
   }, []);
 
-
   // --- LÓGICA DE RENDERIZAÇÃO ---
 
-  // Telas de Carregamento e Erro
-  if (currentView === 'loadingIndex') {
+  if (currentView === "loadingIndex") {
     return <LoadingScreen />;
   }
-  
-  if (currentView === 'error') {
+
+  if (currentView === "error") {
     return (
       <>
         <LoadingScreen error={error || "Erro desconhecido"} />
-        <div className="container text-center">
+        <div className="container text-center space-x-3">
+          {path.length > 0 && (
+            <button onClick={handleBackFromError} className="button button-large mt-4">
+              Voltar
+            </button>
+          )}
           <button onClick={restartQuiz} className="button button-large mt-4">
             Voltar ao Início
           </button>
@@ -348,43 +424,43 @@ const AppQT: React.FC = () => {
     );
   }
 
-  // Tela Principal (Matérias)
-  if (currentView === 'main' && mainIndex) {
-    return <MainScreen mainIndex={mainIndex} onSelectSubject={handleSubjectSelect} isMobile={isMobile} />;
-  }
-
-  // Tela de Assuntos
-  if (currentView === 'subject' && mainIndex && selectedSubject) {
-    const subjectData = mainIndex[selectedSubject];
-    if (!subjectData) {
-      // Fallback caso algo dê errado
-      setError("Matéria não encontrada.");
-      setCurrentView('error');
-      return null;
-    }
+  if (currentView === "main" && mainIndex) {
     return (
-      <SubjectScreen
-        subjectData={subjectData}
-        subjectName={selectedSubject}
-        onSelectSubTopic={handleSubTopicSelect}
-        onBack={handleBackToMain}
+      <MainScreen
+        mainIndex={mainIndex}
+        onSelectNode={handleNodeSelect}
         isMobile={isMobile}
       />
     );
   }
 
-  // Tela de Pontuação
-  if (currentView === 'score') {
-    return <ScoreScreen score={score} total={questions.length} onRestart={restartQuiz} />;
+  if (currentView === "subject" && currentNode && typeof currentNode === "object") {
+    return (
+      <SubjectScreen
+        nodeData={currentNode}
+        path={path}
+        onSelectNode={handleNodeSelect}
+        onBack={handleBackStep}
+        isMobile={isMobile}
+      />
+    );
   }
 
-  // Tela de Carregamento do Quiz
-  if (currentView === 'loadingQuiz') {
+  if (currentView === "score") {
+    return (
+      <ScoreScreen
+        score={score}
+        total={questions.length}
+        onRestart={restartQuiz}
+      />
+    );
+  }
+
+  if (currentView === "loadingQuiz") {
     return <LoadingScreen />;
   }
 
-  // Tela do Quiz
-  if (currentView === 'quiz') {
+  if (currentView === "quiz") {
     if (!questions.length) {
       return <LoadingScreen error="Nenhuma questão encontrada" />;
     }
@@ -394,37 +470,44 @@ const AppQT: React.FC = () => {
       return <LoadingScreen error="Questão não encontrada" />;
     }
 
-    const questionFontSize = getFontSizeClass(currentQuestionData.question.length, isMobile);
+    const questionFontSize = getFontSizeClass(
+      currentQuestionData.question.length,
+      isMobile
+    );
 
     return (
       <div className="container">
-        {/* Header do Quiz com botão Voltar */}
         <div className="flex justify-between items-center mb-2">
-          <button onClick={handleBackToSubject} className="button button-small">
+          <button onClick={handleBackFromQuiz} className="button button-small">
             &larr; Voltar
           </button>
           <span className="button-medium text-gray-500">
             Questão {currentQuestion + 1} de {questions.length}
           </span>
         </div>
-        
+
         <h1 className="title text-center">Quiz: {selectedSubTopic}</h1>
 
         <div className={isMobile ? "" : "quiz-layout"}>
           <div className="question-area">
-            <h2 className={`mb-4 ${questionFontSize}`}>{currentQuestionData.question}</h2>
-            
+            <h2 className={`mb-4 ${questionFontSize}`}>
+              {currentQuestionData.question}
+            </h2>
+
             {showExplanation && (
               <div className="mt-4">
                 <p className="explanation">{currentQuestionData.explanation}</p>
               </div>
             )}
-            
+
             {showExplanation && (
-              <button 
-                onClick={handleNextQuestion} 
-                className="button button-large mt-4">
-                {currentQuestion === questions.length - 1 ? "Ver Resultado" : "Próxima Questão"}
+              <button
+                onClick={handleNextQuestion}
+                className="button button-large mt-4"
+              >
+                {currentQuestion === questions.length - 1
+                  ? "Ver Resultado"
+                  : "Próxima Questão"}
               </button>
             )}
           </div>
@@ -434,7 +517,7 @@ const AppQT: React.FC = () => {
               const isSelected = selectedAnswer === index;
               const isCorrect = index === currentQuestionData.correct;
               const optionFontSize = getOptionFontSize(option, isMobile);
-              
+
               return (
                 <AnswerOption
                   key={index}
@@ -454,7 +537,6 @@ const AppQT: React.FC = () => {
     );
   }
 
-  // Fallback (não deve acontecer)
   return <LoadingScreen error="Estado inválido do aplicativo" />;
 };
 
