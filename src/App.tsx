@@ -67,7 +67,7 @@ interface HistoryNotice {
 
 // --- FUNÇÕES AUXILIARES PARA AS ALTERNATIVAS ---
 
-const OPTION_PREFIX_REGEX = /^[A-Ea-e][\)\.\-]\s/;
+const OPTION_PREFIX_REGEX = /^[A-Ea-e][).-]\s/;
 
 const getOptionLetter = (index: number): string => {
   return String.fromCharCode(65 + index);
@@ -77,7 +77,10 @@ const getOptionText = (option: string): string => {
   return option.replace(OPTION_PREFIX_REGEX, "");
 };
 
-const formatQuizOption = (option: string, index: number): string => {
+const formatQuizOption = (
+  option: string,
+  index: number
+): string => {
   if (OPTION_PREFIX_REGEX.test(option)) {
     return option;
   }
@@ -87,14 +90,26 @@ const formatQuizOption = (option: string, index: number): string => {
 
 // --- FUNÇÕES AUXILIARES DE DATA E IDENTIFICAÇÃO ---
 
+// Compatível com TypeScript 4.4.4.
+// Gera um identificador aleatório de 128 bits.
 const createSessionId = (): string => {
   if (
-    typeof crypto !== "undefined" &&
-    typeof crypto.randomUUID === "function"
+    typeof window !== "undefined" &&
+    typeof window.crypto !== "undefined" &&
+    typeof window.crypto.getRandomValues === "function"
   ) {
-    return crypto.randomUUID();
+    const bytes = new Uint8Array(16);
+
+    window.crypto.getRandomValues(bytes);
+
+    return Array.from(bytes)
+      .map((byte) =>
+        byte.toString(16).padStart(2, "0")
+      )
+      .join("");
   }
 
+  // Alternativa para navegadores sem Web Crypto.
   return (
     Date.now().toString(36) +
     "-" +
@@ -155,7 +170,10 @@ const sanitizeFileName = (text: string): string => {
 };
 
 const getPdfFileName = (round: HistoryRound): string => {
-  const dateTime = getFileDateTime(new Date(round.completedAt));
+  const dateTime = getFileDateTime(
+    new Date(round.completedAt)
+  );
+
   const subject = sanitizeFileName(round.subtopic);
   const roundCode = getRoundCode(round.roundNumber);
 
@@ -248,7 +266,8 @@ const isHistoryRound = (
 
   if (
     !roundQuestions.every(
-      (question, index) => question.position === index + 1
+      (question, index) =>
+        question.position === index + 1
     )
   ) {
     return false;
@@ -297,7 +316,7 @@ const parseHistory = (text: string): HistoryRound[] => {
   return data.rounds;
 };
 
-// Combina históricos, preservando os registros já existentes.
+// Combina históricos, preservando os registros existentes.
 // O ID de cada rodada impede duplicação na importação.
 const mergeHistory = (
   existing: HistoryRound[],
@@ -326,7 +345,9 @@ const mergeHistory = (
 
 // Lê o histórico armazenado no navegador
 const readStoredHistory = (): HistoryRound[] => {
-  const stored = localStorage.getItem(HISTORY_STORAGE_KEY);
+  const stored = localStorage.getItem(
+    HISTORY_STORAGE_KEY
+  );
 
   if (!stored) return [];
 
@@ -425,6 +446,7 @@ const downloadHistoryFile = (
   const link = document.createElement("a");
 
   link.href = url;
+
   link.download =
     `Historico_AppQT_${getFileDateTime(new Date())}.json`;
 
